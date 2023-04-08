@@ -1,0 +1,93 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Http;
+@using System.Web;
+@using System.Text.Json;
+@using System.Text.Json.Nodes;
+@using Microsoft.JSInterop;
+@inject NavigationManager Navigation
+@inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
+
+@if (@CurrentLoginData == null)
+{
+    <p>redirect to google login...</p>
+}
+else
+{
+    <a href="https://myaccount.google.com/">
+        <img src="@CurrentLoginData.PhotoUrl" alt="Google Profile Image" style="width:42px;height:42px;" />
+    </a>
+
+    <p>Welcome @CurrentLoginData.DisplayName!</p>
+    <p>This is a SPA written in Blazor. You saw already the first implemented feature, a client-side google login, your Google-ID is @CurrentLoginData.GoogleId.</p>
+}
+
+
+@code{
+
+    private LoginData? CurrentLoginData { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var jsonLoginData = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "loginData");
+        if(jsonLoginData == null)
+        {
+            var uri = new Uri(Navigation.Uri.Replace("#", "?"));
+            string? accessToken = HttpUtility.ParseQueryString(uri.Query).Get("access_token");
+            if(accessToken == null)
+            {
+                Navigation.NavigateTo("https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=https%3A%2F%2Flocalhost:7087&prompt=select_account&response_type=token&client_id=447695570627-fgjem7l633cinbsugu5pckr1kgaqb8qj.apps.googleusercontent.com&scope=profile&access_type=online");
+            }
+            else
+            {
+                CurrentLoginData = await GetLoginDataAsync(accessToken);
+                if (CurrentLoginData != null)
+                {
+                    await JSRuntime.InvokeVoidAsync("localStorage.setItem", "loginData", CurrentLoginData.ToString());
+                }
+            }
+        }
+        else
+        {
+            CurrentLoginData = JsonSerializer.Deserialize<LoginData>(jsonLoginData);
+        }
+    }
+
+    private async Task<LoginData?> GetLoginDataAsync(string accessToken)
+    {
+        var apiKey = "AIzaSyAxNkd2Hrnd3HFfAAs9l56L2MQsPifCgtI";
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"https://people.googleapis.com/v1/people/me?personFields=names,metadata,photos&key={apiKey}");
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+        var response = await new HttpClient().SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadAsStringAsync();
+            var jsonElement = JsonSerializer.Deserialize<JsonElement>(json);
+
+            var loginData = new LoginData
+                {
+                    AccessToken = accessToken,
+                    GoogleId = jsonElement.GetProperty("metadata").GetProperty("sources")[0].GetProperty("id").GetString(),
+                    DisplayName = jsonElement.GetProperty("names")[0].GetProperty("displayName").GetString(),
+                    PhotoUrl = jsonElement.GetProperty("photos")[0].GetProperty("url").GetString(),
+                };
+
+            return loginData;
+        }
+
+        return null;
+    }
+
+    private class LoginData
+    {
+        public string? AccessToken { get; set; }
+        public string? GoogleId { get; set; }
+        public string? DisplayName { get; set; }
+        public string? PhotoUrl { get; set; }
+
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this);
+        }
+    }
+}
