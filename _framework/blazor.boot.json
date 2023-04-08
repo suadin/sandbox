@@ -51,8 +51,8 @@
       "System.Text.Encodings.Web.dll": "sha256-8lt6KpPp8TuOcY\/bmcUgiz30a7REKog8Mj74MabA4WA=",
       "System.Text.Json.dll": "sha256-pH8rzOUKkCadW8i0iRGCSs3Wav\/UhJiYAQVe9kS37ZI=",
       "System.Web.HttpUtility.dll": "sha256-GqtvO5GXd1uyooydKFQUi7FCCwK\/MGjUAdztSq9xSB0=",
-      "Website.Client.dll": "sha256-c0rclUGxn6lJk4wJ\/Fx7e+f4MQTyFjvVnpuEHt11tKw=",
-      "Website.Shared.dll": "sha256-2jVanfDQvy77UGMVQfN6lfF5Wx1Zka4m0UVSkSft5ag="
+      "Website.Client.dll": "sha256-xSWCZQPYgtEf8Bk5fE+DYrkltfZdWXfEEH2xcDrGaA4=",
+      "Website.Shared.dll": "sha256-0GOdko0FhEAMLFoKM5F2Axsg4cWheMoT3ilDI3Eh3mc="
     },
     "extensions": null,
     "lazyAssembly": null,
