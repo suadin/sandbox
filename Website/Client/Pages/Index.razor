@@ -14,9 +14,13 @@
 }
 else
 {
-    <a href="https://myaccount.google.com/">
-        <img src="@CurrentLoginData.PhotoUrl" alt="Google Profile Image" style="width:42px;height:42px;" />
-    </a>
+    <div>
+        <a href="https://myaccount.google.com/">
+            <img src="@CurrentLoginData.PhotoUrl" alt="Google Profile Image" style="width:42px;height:42px;" />
+        </a>
+        <button @onclick="(async()=>await Logout())">Logout</button>
+    </div>
+
 
     <p>Welcome @CurrentLoginData.DisplayName!</p>
     <p>This is a SPA written in Blazor. You saw already the first implemented feature, a client-side google login, your Google-ID is @CurrentLoginData.GoogleId.</p>
@@ -36,7 +40,7 @@ else
             string? accessToken = HttpUtility.ParseQueryString(uri.Query).Get("access_token");
             if(accessToken == null)
             {
-                Navigation.NavigateTo($"https://accounts.google.com/o/oauth2/v2/auth?redirect_uri={System.Net.WebUtility.UrlEncode(uri.AbsoluteUri)}&prompt=select_account&response_type=token&client_id=447695570627-fgjem7l633cinbsugu5pckr1kgaqb8qj.apps.googleusercontent.com&scope=profile&access_type=online");
+                Navigation.NavigateTo($"https://accounts.google.com/o/oauth2/v2/auth?redirect_uri={System.Net.WebUtility.UrlEncode(Navigation.BaseUri)}&prompt=select_account&response_type=token&client_id=447695570627-fgjem7l633cinbsugu5pckr1kgaqb8qj.apps.googleusercontent.com&scope=profile&access_type=online");
             }
             else
             {
@@ -44,6 +48,7 @@ else
                 if (CurrentLoginData != null)
                 {
                     await JSRuntime.InvokeVoidAsync("localStorage.setItem", "loginData", CurrentLoginData.ToString());
+                    Navigation.NavigateTo(Navigation.BaseUri);
                 }
             }
         }
@@ -51,6 +56,12 @@ else
         {
             CurrentLoginData = JsonSerializer.Deserialize<LoginData>(jsonLoginData);
         }
+    }
+
+    private async Task Logout()
+    {
+        await JSRuntime.InvokeVoidAsync("localStorage.removeItem", "loginData");
+        Navigation.NavigateTo(Navigation.BaseUri, true);
     }
 
     private async Task<LoginData?> GetLoginDataAsync(string accessToken)
