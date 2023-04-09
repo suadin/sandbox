@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using Microsoft.AspNetCore.Http;
 @using System.Web;
 @using System.Text.Json;
@@ -22,8 +22,11 @@ else
     </div>
 
 
-    <p>Welcome @CurrentLoginData.DisplayName!</p>
-    <p>This is a SPA written in Blazor. You saw already the first implemented feature, a client-side google login, your Google-ID is @CurrentLoginData.GoogleId.</p>
+    <p>Welcome @CurrentLoginData.DisplayName!,</p>
+    <p>This is a <a href="https://en.wikipedia.org/wiki/Single-page_application">SPA</a> written in <a href="https://en.wikipedia.org/wiki/Blazor">Blazor</a>-<a href="https://de.wikipedia.org/wiki/WebAssembly">WebAssembly</a>, hosted in <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages">GitHub-Pages</a> with an own <a href="https://en.wikipedia.org/wiki/Domain_name">domain</a> provided by <a href="https://en.wikipedia.org/wiki/Strato_AG">Strato</a>.</p>
+    <p>With cloud provider <a href="https://console.cloud.google.com/">Google</a> the <a href="https://en.wikipedia.org/wiki/Authentication">authentication</a> with <a href="https://console.cloud.google.com/apis/credentials">Credentials-API</a> is implemented as first feature. You are already logged in, therefore seems to work fine.</p>
+    <p>Personal greeting with getting data from <a href="https://developers.google.com/people?hl=en">People-API</a> gave you hopefully a warm getting in.</p>
+    <p>Data like your <a href="https://en.wikipedia.org/wiki/Access_token">access token</a> are stored in local <a href="https://en.wikipedia.org/wiki/Web_storage">Web-Storage</a> to prevent unnecessary re-login after page refresh.</p>
 }
 
 
@@ -69,7 +72,7 @@ else
         var apiKey = "AIzaSyAxNkd2Hrnd3HFfAAs9l56L2MQsPifCgtI";
         using var request = new HttpRequestMessage(HttpMethod.Get, $"https://people.googleapis.com/v1/people/me?personFields=names,metadata,photos&key={apiKey}");
         request.Headers.Add("Authorization", $"Bearer {accessToken}");
-        var response = await new HttpClient().SendAsync(request);
+        var response = await HttpClient.SendAsync(request);
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadAsStringAsync();
